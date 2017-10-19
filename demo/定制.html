@@ -8,29 +8,43 @@
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
     <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css" rel="stylesheet">
     <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js"></script>
-    <script src="../summernote/lang/summernote-zh-CN.js"></script>
-    <script src="../summernote/lang/summernote-ko-KR.js"></script>
+    <script src="../plugin/blockquote/summernote-ext-blockquote.js"></script>
+    <script src="../lang/summernote-zh-CN.js"></script>
+    <script src="../lang/summernote-ko-KR.js"></script>
     <style>
+        .container{
+          width:1000px;
+          height: 600px;
+          position: absolute;top:0;left:0;bottom:0;right:0;
+          margin:auto;
+        }
         .container-draft{
             position:absolute;
-            top:0;left:0;right:0;bottom:0;
+            left:0;right:0;
             margin:auto;
             /*height:500px;*/
             width:800px;
         }
         .bd{
-            position:relative;
-            border:1px solid #ccc;
+            /*position:relative;*/
             height:430px;
             width:800px;
+            border:1px solid #ccc;
+            border-radius:2px;
             overflow: auto;
+        }
+        .toolbar{
+          background-color: #aaa;
+        }
+        .toolbar input[type=file]{
+          display:inline-block;
         }
         .note-editor{
             position:static;
         }
         .panel-heading.note-toolbar{
             position:absolute;
-            bottom:0;
+            bottom:26px;
             z-index:1040;
             display:none;
         }
@@ -47,45 +61,59 @@
             bottom:calc(-100% + 70px);
             top:auto;
         }
+        .note-editable.panel-body{
+          min-height:320px;
+        }
+        .note-editable.panel-body p{
+          margin:0;
+        }
     </style>
 </head>
 <body>
-<div class="container-draft">
+<div class="container">
+  <div class="container-draft">
     <div class="hd">
-        <div class="left">
-            <label for="">收件人</label>
-            <label for="">密送</label>
-            <label for="">抄送</label>
-        </div>
-        <div class="right"></div>
+      <div class="left">
+        <label for="">收件人</label>
+        <label for="">密送</label>
+        <label for="">抄送</label>
+      </div>
+      <div class="right"></div>
     </div>
     <div class="bd">
-        <div id="testEditor"><p>Hello Summernote</p></div>
-        <div class="attachment-body"></div>
+      <div id="testEditor"></div>
+      <div class="attachment-body"></div>
     </div>
     <div class="ft">
-        <div class="toolbar">
-            <button>发送</button>
-            <button id="btnInertMenu">菜单</button>
-            <button id="btnAttachment">附件</button>
-            <button id="btnDrive">网盘</button>
-            <button>图片</button>
-            <button id="btnLanguage">语言</button>
-            <button id="btnInsertHtml">插入html</button>
-            <button id="btnGetHtml">获得html</button>
-        </div>
+      <div class="toolbar">
+        <button>发送</button>
+        <button id="btnInertMenu">菜单</button>
+        <button id="btnAttachment">附件</button>
+        <button id="btnDrive">网盘</button>
+        <input type="file" multiple="multiple" id="selectImage">
+        <button id="btnLink">插入连接</button>
+        <button id="btnLanguage">语言</button>
+        <button id="btnInsertHtml">插入html</button>
+        <button id="btnGetHtml">获得html</button>
+      </div>
     </div>
+  </div>
 </div>
 <script>
     $(document).ready(function() {
-        $('#testEditor').summernote(
-                {
+        $('#testEditor').summernote({
                     lang: 'zh-CN', // default: 'en-US'
-                    height: 400,                 // set editor height
+//                    height: 320,                 // set editor height
                     minHeight: null,             // set minimum height of editor
                     maxHeight: null,             // set maximum height of editor
-                    focus: true,                 // set focus to editable area after initializing summernote
-                    placeholder: ''
+                    focus: true,                // set focus to editable area after initializing summernote
+                    toolbar: [
+                      ['fontname',['fontname']],
+                      ['fontsize',['fontsize']],
+                      ['style',['bold','italic','underline','color']],
+                      ['para', ['ul', 'ol', 'paragraph','blockquote', 'style']],
+                      ['clear', ['clear']]
+                    ]
                 }         // set focus to editable area after initializing summernote
         );
         $('#btnGetHtml').on('click', function () {
@@ -96,11 +124,49 @@
         var signature = '<div><a href="mailto:longde.zhang@nextcont.com" style="font-family:verdana;font-size:13px" target="_blank">longde.zhang@nextcont.com</a>&nbsp;觉新&nbsp;</div>'
         $('#btnDrive').on('click', function () {
         })
+         $('#selectImage').on('change', function (e) {
+           var files = this.files;
+           var file = files[0];
+
+           // 接受 jpeg, jpg, png 类型的图片
+           if (!/\/(?:jpeg|jpg|png)/i.test(file.type)) return;
+
+           var reader = new FileReader();
+           reader.onload = function() {
+             var result = this.result;
+//             console.log(result);
+             var imgEle = new Image()
+             imgEle.src = result
+             imgEle.style.maxWidth = '100%'
+             $('#testEditor').summernote('pasteHTML', imgEle);
+           };
+
+           reader.onloadend = function(){
+             var result = this.result;
+//             console.log('-------------------onloadend');
+//             console.log(result);
+           }
+
+           reader.onerror = function(){
+             var result = this.result;
+             console.log('读取文件错误');
+             console.log(result);
+           }
+
+           reader.readAsDataURL(file);
+        })
         $('#btnInertMenu').on('click', function () {
             $('.panel-heading.note-toolbar').toggle()
         })
         $('#btnAttachment').on('click', function () {
             $('.attachment-body').append('<div>附件</div>')
+        })
+        $('#btnLink').on('click', function () {
+          $('#testEditor').summernote('createLink', {
+            text: 'baidu',
+            url: 'https://www.baidu.com',
+            isNewWindow: true
+          });
         })
         $('#btnLanguage').on('click', function () {
             $('#testEditor').summernote({
@@ -112,6 +178,11 @@
             $('#testEditor').summernote('pasteHTML', signature);
             $('#testEditor').summernote('pasteHTML', '<div contenteditable="false" class="google_drive_chip" style="width: 396px; height: 30px; max-height: 30px; background-color: rgb(245, 245, 245); padding: 0; color: rgb(34, 34, 34); font-family: arial; font-style: normal; font-weight: bold; font-size: 13px; cursor: default; border: 1px solid rgb(221, 221, 221); line-height: 30px;"><a href="undefined" target="_blank" style="display:inline-block; max-width: 366px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-decoration: none; cursor: pointer; padding: 0; border: none; line-height: 30px;" title="客户端相关文档"><img contenteditable="false" style="vertical-align: bottom; border: none; margin-bottom: 7px; margin-left: 6px;width: 16px;height: 16px;" src="https://cdn10.inecm.cn/iconLink/vnd.google-apps.folder+shared.svg" />&nbsp;客户端相关文档</a><span contenteditable="false" class="remove_this_googledrive_file_item">×</span></div>&#8203;<br clear="all" />');
         })
+
+      // summernote.change
+      $('#testEditor').on('summernote.change', function(we, contents, $editable) {
+        console.log('summernote\'s content is changed.');
+      });
     });
 </script>
 </body>
