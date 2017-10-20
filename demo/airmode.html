@@ -58,8 +58,8 @@
             /*overflow:visible;*/
         }
         .dropdown-menu{
-            bottom:calc(-100% + 70px);
-            top:auto;
+            /*bottom:calc(-100% + 70px);*/
+            /*top:auto;*/
         }
         .note-editable.panel-body{
           min-height:320px;
@@ -113,19 +113,14 @@
                     minHeight: null,             // set minimum height of editor
                     maxHeight: null,             // set maximum height of editor
                     focus: true,                // set focus to editable area after initializing summernote
-                    fontNames: [
-                      '宋体', '黑体', '楷体', '微软雅黑',
-                      'Arial', 'Verdana', 'Georgia',
-                      'Times New Roman', 'Microsoft JhengHei',
-                      'Trebuchet MS', 'Courier New', 'Impact', 'Comic Sans MS', 'Consolas'
-                    ],
                     toolbar: [
                       ['fontname',['fontname']],
                       ['fontsize',['fontsize']],
                       ['style',['bold','italic','underline','color']],
                       ['para', ['ul', 'ol', 'paragraph','blockquote', 'style']],
                       ['clear', ['clear']]
-                    ]
+                    ],
+                    airMode: true
                 }         // set focus to editable area after initializing summernote
         );
         $('#btnGetHtml').on('click', function () {
